@@ -239,7 +239,7 @@ namespace Microsoft.OData.JsonLight
 
         /// <summary>
         /// Given an enumerable of dependsOn ids containing request ids and group ids, return an enumeration of
-        /// equivalent request ids by converting the group ids into associated request ids.
+        /// the same request ids and group ids.
         /// </summary>
         /// <param name="dependsOnIds">The dependsOn ids specifying current request's prerequisites.</param>
         /// <returns>An enumerable consists of request ids.</returns>
@@ -248,17 +248,18 @@ namespace Microsoft.OData.JsonLight
             List<string> dependsOnRequestIds = new List<string>();
             foreach (string id in dependsOnIds)
             {
-                if (this.atomicityGroupIdToRequestId.ContainsKey(id))
-                {
-                    dependsOnRequestIds.AddRange(this.atomicityGroupIdToRequestId[id]);
-                }
-                else
-                {
-                    dependsOnRequestIds.Add(id);
-                }
+                dependsOnRequestIds.Add(id);
             }
 
             return dependsOnRequestIds;
+        }
+
+        /// <summary>
+        /// Validate if the dependsOnIds are in the ContentIdCache.
+        /// </summary>
+        /// <param name="dependsOnIds">The dependsOn ids specifying current request's prerequisites.</param>
+        protected override void ValidateDependsOnIds(string contentId, IEnumerable<string> dependsOnIds)
+        {
         }
 
         /// <summary>
