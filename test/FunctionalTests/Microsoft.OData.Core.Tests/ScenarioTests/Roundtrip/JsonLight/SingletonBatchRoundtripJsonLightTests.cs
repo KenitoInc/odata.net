@@ -829,6 +829,7 @@ Content-Type: application/json;odata.metadata=none
             }
         }, {
             ""id"": ""3"",
+            ""atomicityGroup"": ""11d431dd-cfee-48c8-95fb-da8491644fa6"",
             ""dependsOn"": [""1"", ""2""],
             ""method"": ""PATCH"",
             ""url"": ""http://odata.org/test/$1/alias"",
@@ -1036,7 +1037,7 @@ Content-Type: application/json;odata.metadata=none
             }
             catch (ODataException e)
             {
-                Assert.Contains("is not matching any of the request Id and atomic group Id seen so far", e.Message);
+                Assert.Contains("is not found in effective depends-on-Ids", e.Message);
                 return;
             }
 
@@ -1557,7 +1558,7 @@ Content-Type: application/json;odata.metadata=none
         private byte[] CreateCreateReferenceUriBatchRequestUseDifferentBaseUri(ODataVersion version)
         {
             return CreateReferenceUriBatchRequest(version, useInvalidDependsOnIds: false,
-                useRequestIdOfGroupForDependsOnIds: false, useDifferentBaseUri: true);
+                useRequestIdOfGroupForDependsOnIds: true, useDifferentBaseUri: true);
         }
 
         /// <summary>
