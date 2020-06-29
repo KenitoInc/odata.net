@@ -1066,15 +1066,17 @@ Content-Type: application/json;odata.metadata=none
                 "request with invalid dependsOn Ids in V401.");
         }
 
-        [Fact]
+        // We updated CreateReferenceUriBatchRequest to have all requests in the same atomicity group.
+        // Therefore use request IDs instead of atomicityGroup Id in dependsOn.
+        /*[Fact]
         public void BatchJsonLightInvalidUseRequestIdOfGroupForDependsOnIdsV401Test()
         {
             bool exceptionThrown = true;
             try
             {
                 this.CreateReferenceUriBatchRequest(ODataVersion.V401,
-                    false /*useInvalidDependsOnIds*/,
-                    true  /*useRequestIdOfGroupForDependsOnIds*/);
+                    false *//*useInvalidDependsOnIds*//*,
+                    true  *//*useRequestIdOfGroupForDependsOnIds*//*);
                 exceptionThrown = false;
             }
             catch (ODataException e)
@@ -1085,7 +1087,7 @@ Content-Type: application/json;odata.metadata=none
 
             Assert.True(exceptionThrown, "An exception should have been thrown when trying to create " +
                 "request with invalid dependsOn Ids in V401.");
-        }
+        }*/
 
         [Fact]
         public void BatchJsonLightReferenceUriV401Test()
