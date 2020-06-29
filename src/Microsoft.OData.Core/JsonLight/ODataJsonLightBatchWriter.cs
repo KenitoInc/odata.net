@@ -260,6 +260,14 @@ namespace Microsoft.OData.JsonLight
         /// <param name="dependsOnIds">The dependsOn ids specifying current request's prerequisites.</param>
         protected override void ValidateDependsOnIds(string contentId, IEnumerable<string> dependsOnIds)
         {
+           foreach(var id in dependsOnIds)
+            {
+                // Content-ID cannot be part of dependsOnIds. This is to avoid self referencing.
+                if (id == contentId)
+                {
+                    throw new ODataException(Strings.ODataBatchReader_DependsOnIdNotFound(id, contentId));
+                }
+            }
         }
 
         /// <summary>
