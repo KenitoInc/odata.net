@@ -781,6 +781,7 @@ Content-Type: application/json;odata.metadata=none
             }
         }, {
             ""id"": ""3"",
+            ""atomicityGroup"": ""11d431dd-cfee-48c8-95fb-da8491644fa6"",
             ""dependsOn"": [""1"", ""2""],
             ""method"": ""PATCH"",
             ""url"": ""$1/alias"",
@@ -859,6 +860,7 @@ Content-Type: application/json;odata.metadata=none
             ""headers"": {}
         }, {
             ""id"": ""fd811ff7-4c67-4a2f-bbe1-60b606093f14"",
+            ""atomicityGroup"": ""6e5679f2-2fb9-4097-84a9-623a0960a50f"",
             ""status"": 204,
             ""headers"": {}
         }
@@ -1087,7 +1089,7 @@ Content-Type: application/json;odata.metadata=none
         [Fact]
         public void BatchJsonLightReferenceUriV401Test()
         {
-            byte[] requestPayload = this.CreateReferenceUriBatchRequest(ODataVersion.V401);
+            byte[] requestPayload = this.CreateReferenceUriBatchRequest(ODataVersion.V401, false, true, false);
             VerifyPayload(requestPayload, ExpectedReferenceUriRequestPayload);
 
             byte[] responsePayload = this.ServiceReadReferenceUriBatchRequestAndWriteResponse(requestPayload);
@@ -1634,8 +1636,6 @@ Content-Type: application/json;odata.metadata=none
                     entryWriter.WriteEnd();
                 }
 
-                batchWriter.WriteEndChangeset();
-
                 // Another PATCH operation that depends on both operations above.
                 if (useInvalidDependsOnIds)
                 {
@@ -1643,7 +1643,7 @@ Content-Type: application/json;odata.metadata=none
                 }
                 else if (useRequestIdOfGroupForDependsOnIds)
                 {
-                    dependsOnIds = new string[] {"1", "2"};
+                    dependsOnIds = new string[] { "1", "2" };
                 }
                 else
                 {
@@ -1674,6 +1674,7 @@ Content-Type: application/json;odata.metadata=none
                     entryWriter.WriteEnd();
                 }
 
+                batchWriter.WriteEndChangeset();
                 batchWriter.WriteEndBatch();
 
                 stream.Position = 0;
