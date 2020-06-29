@@ -263,7 +263,10 @@ namespace Microsoft.OData.JsonLight
            foreach(var id in dependsOnIds)
             {
                 // Content-ID cannot be part of dependsOnIds. This is to avoid self referencing.
-                if (id == contentId)
+                // The dependsOnId must be either an existing request ID or atomicityGroup
+                if (id == contentId ||
+                    (!this.atomicityGroupIdToRequestId.ContainsKey(id) &&
+                    !this.requestIdToAtomicGroupId.ContainsKey(id)))
                 {
                     throw new ODataException(Strings.ODataBatchReader_DependsOnIdNotFound(id, contentId));
                 }
