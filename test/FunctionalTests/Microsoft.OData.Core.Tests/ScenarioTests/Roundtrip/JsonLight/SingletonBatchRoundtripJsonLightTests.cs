@@ -1023,7 +1023,10 @@ Content-Type: application/json;odata.metadata=none
             Assert.True(expectedExceptionThrown, "Uri self-referencing with its Content-ID should not be allowed.");
         }
 
-        [Fact]
+        // This test isn't relevant in Json Batch.
+        // When we use atomicGroup Id in dependsOn, We flatten the group to extract the request Ids.
+        // We use the Request ids in reference Uris.
+        /*[Fact]
         public void BatchJsonLightReferenceUriV4TestShouldThrow()
         {
             bool exceptionThrown = true;
@@ -1040,7 +1043,7 @@ Content-Type: application/json;odata.metadata=none
 
             Assert.True(exceptionThrown, "An exception should have been thrown when trying to refer to the " +
                 "content Id of the last request of a change set or atomic group in V4.");
-        }
+        }*/
 
         [Fact]
         public void BatchJsonLightUseInvalidDependsOnIdsV401Test()
