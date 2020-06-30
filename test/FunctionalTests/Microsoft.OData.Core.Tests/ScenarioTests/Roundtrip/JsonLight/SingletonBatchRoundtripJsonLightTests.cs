@@ -781,7 +781,6 @@ Content-Type: application/json;odata.metadata=none
             }
         }, {
             ""id"": ""3"",
-            ""atomicityGroup"": ""11d431dd-cfee-48c8-95fb-da8491644fa6"",
             ""dependsOn"": [""1"", ""2""],
             ""method"": ""PATCH"",
             ""url"": ""$1/alias"",
@@ -829,7 +828,6 @@ Content-Type: application/json;odata.metadata=none
             }
         }, {
             ""id"": ""3"",
-            ""atomicityGroup"": ""11d431dd-cfee-48c8-95fb-da8491644fa6"",
             ""dependsOn"": [""1"", ""2""],
             ""method"": ""PATCH"",
             ""url"": ""http://odata.org/test/$1/alias"",
@@ -861,7 +859,6 @@ Content-Type: application/json;odata.metadata=none
             ""headers"": {}
         }, {
             ""id"": ""fd811ff7-4c67-4a2f-bbe1-60b606093f14"",
-            ""atomicityGroup"": ""6e5679f2-2fb9-4097-84a9-623a0960a50f"",
             ""status"": 204,
             ""headers"": {}
         }
@@ -1037,7 +1034,7 @@ Content-Type: application/json;odata.metadata=none
             }
             catch (ODataException e)
             {
-                Assert.Contains("is not found in effective depends-on-Ids", e.Message);
+                Assert.Contains("is not matching any of the request Id and atomic group Id seen so far", e.Message);
                 return;
             }
 
@@ -1066,17 +1063,15 @@ Content-Type: application/json;odata.metadata=none
                 "request with invalid dependsOn Ids in V401.");
         }
 
-        // We updated CreateReferenceUriBatchRequest to have all requests in the same atomicity group.
-        // Therefore use request IDs instead of atomicityGroup Id in dependsOn.
-        /*[Fact]
+        [Fact]
         public void BatchJsonLightInvalidUseRequestIdOfGroupForDependsOnIdsV401Test()
         {
             bool exceptionThrown = true;
             try
             {
                 this.CreateReferenceUriBatchRequest(ODataVersion.V401,
-                    false *//*useInvalidDependsOnIds*//*,
-                    true  *//*useRequestIdOfGroupForDependsOnIds*//*);
+                    false /*useInvalidDependsOnIds*/,
+                    true  /*useRequestIdOfGroupForDependsOnIds*/);
                 exceptionThrown = false;
             }
             catch (ODataException e)
@@ -1087,12 +1082,12 @@ Content-Type: application/json;odata.metadata=none
 
             Assert.True(exceptionThrown, "An exception should have been thrown when trying to create " +
                 "request with invalid dependsOn Ids in V401.");
-        }*/
+        }
 
         [Fact]
         public void BatchJsonLightReferenceUriV401Test()
         {
-            byte[] requestPayload = this.CreateReferenceUriBatchRequest(ODataVersion.V401, false, true, false);
+            byte[] requestPayload = this.CreateReferenceUriBatchRequest(ODataVersion.V401/*, false, true, false*/);
             VerifyPayload(requestPayload, ExpectedReferenceUriRequestPayload);
 
             byte[] responsePayload = this.ServiceReadReferenceUriBatchRequestAndWriteResponse(requestPayload);
@@ -1560,7 +1555,7 @@ Content-Type: application/json;odata.metadata=none
         private byte[] CreateCreateReferenceUriBatchRequestUseDifferentBaseUri(ODataVersion version)
         {
             return CreateReferenceUriBatchRequest(version, useInvalidDependsOnIds: false,
-                useRequestIdOfGroupForDependsOnIds: true, useDifferentBaseUri: true);
+                useRequestIdOfGroupForDependsOnIds: false, useDifferentBaseUri: true);
         }
 
         /// <summary>
@@ -1639,6 +1634,8 @@ Content-Type: application/json;odata.metadata=none
                     entryWriter.WriteEnd();
                 }
 
+                batchWriter.WriteEndChangeset();
+
                 // Another PATCH operation that depends on both operations above.
                 if (useInvalidDependsOnIds)
                 {
@@ -1677,7 +1674,7 @@ Content-Type: application/json;odata.metadata=none
                     entryWriter.WriteEnd();
                 }
 
-                batchWriter.WriteEndChangeset();
+                //batchWriter.WriteEndChangeset();
                 batchWriter.WriteEndBatch();
 
                 stream.Position = 0;
