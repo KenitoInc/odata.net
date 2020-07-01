@@ -54,6 +54,18 @@ namespace Microsoft.OData.JsonLight
         private ODataJsonLightBatchPayloadItemPropertiesCache messagePropertiesCache = null;
 
         /// <summary>
+        /// Dictionary for keeping track of each request's associated atomic group id, which is null
+        /// for request that does not belong to atomic group.
+        /// </summary>
+        private Dictionary<string, string> requestIdToAtomicGroupId = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Dictionary for keeping track of each atomic group's member request id. This is optimization
+        /// for reversed lookup.
+        /// </summary>
+        private Dictionary<string, IList<string>> atomicityGroupIdToRequestId = new Dictionary<string, IList<string>>();
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="inputContext">The input context to read the content from.</param>
@@ -311,6 +323,17 @@ namespace Microsoft.OData.JsonLight
             string groupId = (string)this.messagePropertiesCache.GetPropertyValue(
                         ODataJsonLightBatchPayloadItemPropertiesCache.PropertyNameAtomicityGroup);
 
+            this.requestIdToAtomicGroupId.Add(contentId, groupId);
+            if(groupId != null)
+            {
+                if (!this.atomicityGroupIdToRequestId.ContainsKey(groupId))
+                {
+                    this.atomicityGroupIdToRequestId.Add(groupId, new List<string>() { contentId });
+                }
+
+                this.atomicityGroupIdToRequestId[groupId].Add(contentId);
+            }
+
             ODataBatchOperationHeaders headers = (ODataBatchOperationHeaders)
                 this.messagePropertiesCache.GetPropertyValue(ODataJsonLightBatchPayloadItemPropertiesCache.PropertyNameHeaders);
 
@@ -330,6 +353,25 @@ namespace Microsoft.OData.JsonLight
             //// NOTE: Content-IDs for cross referencing are only supported in request messages; in responses
             //// we allow a Content-ID header but don't process it (i.e., don't add the content ID to the URL resolver).
             return responseMessage;
+        }
+
+        /// <summary>
+        /// Validate if the dependsOnIds are in the ContentIdCache.
+        /// </summary>
+        /// <param name="dependsOnIds">The dependsOn ids specifying current request's prerequisites.</param>
+        protected override void ValidateDependsOnIds(string contentId, IEnumerable<string> dependsOnIds)
+        {
+            foreach (var id in dependsOnIds)
+            {
+                // Content-ID cannot be part of dependsOnIds. This is to avoid self referencing.
+                // The dependsOnId must be an existing request ID or atomicityGroup
+                if (id == contentId ||
+                    (!this.requestIdToAtomicGroupId.ContainsKey(id) &&
+                    !this.atomicityGroupIdToRequestId.ContainsKey(id)))
+                {
+                    throw new ODataException(Strings.ODataBatchReader_DependsOnIdNotFound(id, contentId));
+                }
+            }
         }
 
         /// <summary>

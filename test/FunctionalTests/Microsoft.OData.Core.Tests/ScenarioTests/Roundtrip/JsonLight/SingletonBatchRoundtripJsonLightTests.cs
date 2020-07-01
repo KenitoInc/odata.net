@@ -1023,9 +1023,11 @@ Content-Type: application/json;odata.metadata=none
             Assert.True(expectedExceptionThrown, "Uri self-referencing with its Content-ID should not be allowed.");
         }
 
-        // This test isn't relevant in Json Batch.
-        // When we use atomicGroup Id in dependsOn, We flatten the group to extract the request Ids.
-        // We use the Request ids in reference Uris.
+        // This test isn't relevant in Json Batch v4.
+        // We use atomicGroup Id in dependsOn for 2 reasons:
+        // 1. To extract Request ids for use in reference Uris (in v4.01).
+        // 2. To sequence requests so that they are executed in a certain order (in both v4 and v4.01).
+        // This test made an assumption that we only use atomicityGroup for 1 above.
         /*[Fact]
         public void BatchJsonLightReferenceUriV4TestShouldThrow()
         {
@@ -1044,6 +1046,16 @@ Content-Type: application/json;odata.metadata=none
             Assert.True(exceptionThrown, "An exception should have been thrown when trying to refer to the " +
                 "content Id of the last request of a change set or atomic group in V4.");
         }*/
+
+        [Fact]
+        public void BatchJsonLightDependsOnAtomicityGroupV4Test()
+        {
+            byte[] requestPayload = this.CreateReferenceUriBatchRequest(ODataVersion.V4);
+            VerifyPayload(requestPayload, ExpectedReferenceUriRequestPayload);
+
+            byte[] responsePayload = this.ServiceReadReferenceUriBatchRequestAndWriteResponse(requestPayload);
+            VerifyPayload(responsePayload, ExpectedReferenceUriResponsePayload);
+        }
 
         [Fact]
         public void BatchJsonLightUseInvalidDependsOnIdsV401Test()
@@ -1090,7 +1102,7 @@ Content-Type: application/json;odata.metadata=none
         [Fact]
         public void BatchJsonLightReferenceUriV401Test()
         {
-            byte[] requestPayload = this.CreateReferenceUriBatchRequest(ODataVersion.V401/*, false, true, false*/);
+            byte[] requestPayload = this.CreateReferenceUriBatchRequest(ODataVersion.V401);
             VerifyPayload(requestPayload, ExpectedReferenceUriRequestPayload);
 
             byte[] responsePayload = this.ServiceReadReferenceUriBatchRequestAndWriteResponse(requestPayload);
@@ -1263,6 +1275,7 @@ Content-Type: application/json;odata.metadata=none
             using (StreamReader sr = new StreamReader(stream))
             {
                 string normalizedPayload = GetNormalizedJsonMessage(sr.ReadToEnd());
+                //string normalizedPayload = sr.ReadToEnd();
                 string normalizedExpectedPayload = GetNormalizedJsonMessage(expectedPayload);
 
                 Assert.Equal(normalizedExpectedPayload, normalizedPayload);
@@ -1677,7 +1690,6 @@ Content-Type: application/json;odata.metadata=none
                     entryWriter.WriteEnd();
                 }
 
-                //batchWriter.WriteEndChangeset();
                 batchWriter.WriteEndBatch();
 
                 stream.Position = 0;
@@ -1690,6 +1702,7 @@ Content-Type: application/json;odata.metadata=none
             IODataRequestMessage requestMessage = new InMemoryMessage() { Stream = new MemoryStream(requestPayload) };
             requestMessage.SetHeader("Content-Type", GetContentTypeHeader(BatchFormat.ApplicationJson));
             ODataMessageReaderSettings settings = new ODataMessageReaderSettings {BaseUri = new Uri(serviceDocumentUri)};
+            settings.Version = ODataVersion.V4;
 
             using (ODataMessageReader messageReader = new ODataMessageReader(requestMessage, settings, this.userModel))
             {
