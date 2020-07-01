@@ -136,6 +136,21 @@ namespace Microsoft.OData.JsonLight
             string atomicityGroupId = (string)this.messagePropertiesCache.GetPropertyValue(
                 ODataJsonLightBatchPayloadItemPropertiesCache.PropertyNameAtomicityGroup);
 
+            if (id != null)
+            {
+                this.requestIdToAtomicGroupId.Add(id, atomicityGroupId);
+            }
+
+            if (atomicityGroupId != null)
+            {
+                if (!this.atomicityGroupIdToRequestId.ContainsKey(atomicityGroupId))
+                {
+                    this.atomicityGroupIdToRequestId.Add(atomicityGroupId, new List<string>() { id });
+                }
+
+                this.atomicityGroupIdToRequestId[atomicityGroupId].Add(id);
+            }
+
             // dependsOn
             // Flatten the dependsOn list by converting every groupId into request Ids, so that the caller
             // can decide, at the earliest opportunity, whether the depending request can be invoked.
@@ -322,17 +337,6 @@ namespace Microsoft.OData.JsonLight
 
             string groupId = (string)this.messagePropertiesCache.GetPropertyValue(
                         ODataJsonLightBatchPayloadItemPropertiesCache.PropertyNameAtomicityGroup);
-
-            this.requestIdToAtomicGroupId.Add(contentId, groupId);
-            if(groupId != null)
-            {
-                if (!this.atomicityGroupIdToRequestId.ContainsKey(groupId))
-                {
-                    this.atomicityGroupIdToRequestId.Add(groupId, new List<string>() { contentId });
-                }
-
-                this.atomicityGroupIdToRequestId[groupId].Add(contentId);
-            }
 
             ODataBatchOperationHeaders headers = (ODataBatchOperationHeaders)
                 this.messagePropertiesCache.GetPropertyValue(ODataJsonLightBatchPayloadItemPropertiesCache.PropertyNameHeaders);
