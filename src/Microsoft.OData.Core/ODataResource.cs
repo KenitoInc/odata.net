@@ -214,6 +214,17 @@ namespace Microsoft.OData
         }
 
         /// <summary>
+        /// Returns true if an id was provided by the user or seen on the wire, false otherwise.
+        /// </summary>
+        public bool HasNonComputedId
+        {
+            get
+            {
+                return this.hasNonComputedId;
+            }
+        }
+
+        /// <summary>
         /// The metadata builder for this OData resource.
         /// </summary>
         internal ODataResourceMetadataBuilder MetadataBuilder
@@ -243,17 +254,6 @@ namespace Microsoft.OData
             get
             {
                 return this.id;
-            }
-        }
-
-        /// <summary>
-        /// true if an id was provided by the user or seen on the wire, false otherwise.
-        /// </summary>
-        internal bool HasNonComputedId
-        {
-            get
-            {
-                return this.hasNonComputedId;
             }
         }
 

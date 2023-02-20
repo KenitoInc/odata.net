@@ -29,6 +29,7 @@ namespace Microsoft.OData.Tests.ScenarioTests.Reader.JsonLight
             EdmModel tmpModel = new EdmModel();
 
             this.webType = new EdmEntityType("NS", "Web");
+            this.webType.AddKeys(this.webType.AddStructuralProperty("Id", EdmCoreModel.Instance.GetInt32(false)));
             this.webType.AddStructuralProperty("WebId", EdmPrimitiveTypeKind.Int32);
             this.webType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
             tmpModel.AddElement(this.webType);
@@ -73,7 +74,7 @@ namespace Microsoft.OData.Tests.ScenarioTests.Reader.JsonLight
         }
 
         [Fact]
-        public void ReadSingletonWithIdSpecifiedTest()
+        public void ReadSingletonWithODataIdSpecifiedTest()
         {
             const string payload = "{" +
                 "\"@odata.context\":\"http://odata.org/test/$metadata#MySingleton\"," +
@@ -86,6 +87,22 @@ namespace Microsoft.OData.Tests.ScenarioTests.Reader.JsonLight
             Assert.Equal(new Uri("http://odata.org/test/Bla"), entry.Id);
             Assert.Equal(new Uri("http://odata.org/test/BlaBla"), entry.EditLink);
             Assert.Equal(new Uri("http://odata.org/test/BlaBlaBla"), entry.ReadLink);
+            Assert.True(entry.HasNonComputedId);
+        }
+
+        [Fact]
+        public void ReadSingletonWithIdPropertySpecifiedTest()
+        {
+            const string payload = "{" +
+                "\"@odata.context\":\"http://odata.org/test/$metadata#MySingleton\"," +
+                "\"Id\":\"1\"," +
+                "\"WebId\":\"101\"," +
+                "\"Name\":\"SingletonWeb\"}";
+
+            ODataResource entry = this.ReadSingleton(payload);
+
+            Assert.Equal(new Uri("http://odata.org/test/MySingleton"), entry.Id);
+            Assert.False(entry.HasNonComputedId);
         }
 
         [Fact]
