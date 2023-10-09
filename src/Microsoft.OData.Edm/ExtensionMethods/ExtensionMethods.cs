@@ -1367,6 +1367,18 @@ namespace Microsoft.OData.Edm
         }
 
         /// <summary>
+        /// Resolves the target path and returns the path segments as vocabulary annotatable elements.
+        /// </summary>
+        /// <param name="model">The EdmModel.</param>
+        /// <param name="target">The annotations target.</param>
+        /// <returns>The created term.</returns>
+        public static IEnumerable<IEdmElement> ResolveAnnotationsTarget(this EdmModel model, string target)
+        {
+            // Implementation code
+            return null;
+        }
+
+        /// <summary>
         /// Creates and adds a new instance of the <see cref="EdmTerm"/> class from a type reference.
         /// </summary>
         /// <param name="model">The EdmModel.</param>

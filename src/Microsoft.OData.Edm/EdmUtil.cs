@@ -422,6 +422,13 @@ namespace Microsoft.OData.Edm
         internal static string FullyQualifiedName(IEdmVocabularyAnnotatable element)
         {
             IEdmSchemaElement schemaElement = element as IEdmSchemaElement;
+            IEdmAnnotationsTarget annotationsTarget = element as IEdmAnnotationsTarget;
+
+            if (annotationsTarget != null)
+            {
+                return annotationsTarget.Target;
+            }
+
             if (schemaElement != null)
             {
                 IEdmOperation operation = schemaElement as IEdmOperation;

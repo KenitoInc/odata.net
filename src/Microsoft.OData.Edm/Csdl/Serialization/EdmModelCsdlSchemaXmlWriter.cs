@@ -411,6 +411,7 @@ namespace Microsoft.OData.Edm.Csdl.Serialization
         internal override void WriteOperationParameterEndElement(IEdmOperationParameter parameter)
         {
             IEdmOptionalParameter optionalParameter = parameter as IEdmOptionalParameter;
+
             if (optionalParameter != null && !(optionalParameter.VocabularyAnnotations(this.Model).Any(a => a.Term == CoreVocabularyModel.OptionalParameterTerm)))
             {
                 string defaultValue = optionalParameter.DefaultValueString;

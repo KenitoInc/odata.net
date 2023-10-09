@@ -145,7 +145,27 @@ namespace Microsoft.OData.Edm
         public override IEnumerable<IEdmVocabularyAnnotation> FindDeclaredVocabularyAnnotations(IEdmVocabularyAnnotatable element)
         {
             List<IEdmVocabularyAnnotation> elementAnnotations;
-            return this.vocabularyAnnotationsDictionary.TryGetValue(element, out elementAnnotations) ? elementAnnotations : Enumerable.Empty<IEdmVocabularyAnnotation>();
+
+            this.vocabularyAnnotationsDictionary.TryGetValue(element, out elementAnnotations);
+
+            if (elementAnnotations == null)
+            {
+                elementAnnotations = Enumerable.Empty<IEdmVocabularyAnnotation>().ToList();
+            }
+
+            foreach (var kvp in this.vocabularyAnnotationsDictionary)
+            {
+                if (kvp.Key is IEdmAnnotationsTarget annotationsTarget)
+                {
+                    if (annotationsTarget.TargetElement == element)
+                    {
+                        elementAnnotations.AddRange(kvp.Value);
+                        elementAnnotations = elementAnnotations.Distinct().ToList();
+                    }
+                }
+            }
+
+            return elementAnnotations;
         }
 
         /// <summary>
