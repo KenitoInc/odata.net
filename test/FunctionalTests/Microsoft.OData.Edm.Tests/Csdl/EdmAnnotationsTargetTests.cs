@@ -15,6 +15,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 #endif
 using System.Xml;
+using System.Xml.Linq;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Validation;
 using Microsoft.OData.Edm.Vocabularies;
@@ -206,6 +207,54 @@ namespace Microsoft.OData.Edm.Tests.Csdl
             }
         }
 
+        [Fact]
+        public void ParsingEnumMemberWithAnnotationsWorks()
+        {
+            string types =
+@"<EnumType Name=""Color"" >
+  <Member Name=""Red"" Value=""1"" >
+    <Annotation String=""Inline Description"" Term=""Org.OData.Core.V1.LongDescription""/>
+    <Annotation String=""Inline MyTerm Value"" Term=""NS.MyTerm""/>
+  </Member>
+  <Member Name=""Blue"" Value=""2"" />
+</EnumType>
+<Term Name=""MyTerm"" Type=""Edm.String""/>
+<Annotations Target=""NS.Color/Blue"" >
+  <Annotation String=""OutOfLine Description"" Term=""Org.OData.Core.V1.LongDescription""/>
+  <Annotation String=""OutOfLine MyTerm Value"" Term=""NS.MyTerm""/>
+</Annotations>";
+
+            IEdmModel model = GetEdmModel(types: types);
+            Assert.NotNull(model);
+
+            IEnumerable<EdmError> errors;
+            Assert.True(model.Validate(out errors), String.Format("Errors in validating model. {0}", String.Concat(errors.Select(e => e.ErrorMessage))));
+
+            var color = model.SchemaElements.OfType<IEdmEnumType>().FirstOrDefault(c => c.Name == "Color");
+            Assert.NotNull(color);
+
+            IEdmTerm fooBarTerm = model.FindDeclaredTerm("NS.MyTerm");
+            Assert.NotNull(fooBarTerm);
+
+            // Red
+            var red = color.Members.FirstOrDefault(c => c.Name == "Red");
+            Assert.NotNull(red);
+            string redAnnotation = GetStringAnnotation(model, red, CoreVocabularyModel.LongDescriptionTerm, EdmVocabularyAnnotationSerializationLocation.Inline);
+            Assert.Equal("Inline Description", redAnnotation);
+
+            redAnnotation = GetStringAnnotation(model, red, fooBarTerm, EdmVocabularyAnnotationSerializationLocation.Inline);
+            Assert.Equal("Inline MyTerm Value", redAnnotation);
+
+            // Blue
+            var blue = color.Members.FirstOrDefault(c => c.Name == "Blue");
+            Assert.NotNull(blue);
+            string blueAnnotation = GetStringAnnotation(model, blue, CoreVocabularyModel.LongDescriptionTerm, EdmVocabularyAnnotationSerializationLocation.OutOfLine, false);
+            Assert.Equal("OutOfLine Description", blueAnnotation);
+
+            blueAnnotation = GetStringAnnotation(model, blue, fooBarTerm, EdmVocabularyAnnotationSerializationLocation.OutOfLine, false);
+            Assert.Equal("OutOfLine MyTerm Value", blueAnnotation);
+        }
+
         internal void WriteAndVerifyJson(IEdmModel model, string expected, bool indented = true, bool isIeee754Compatible = false)
         {
 #if NETCOREAPP3_1
@@ -233,6 +282,66 @@ namespace Microsoft.OData.Edm.Tests.Csdl
                 Assert.Equal(expected, actual);
             }
 #endif
+        }
+
+        private static IEdmModel GetEdmModel(string types = "", string properties = "")
+        {
+            const string template = @"<edmx:Edmx Version=""4.0"" xmlns:edmx=""http://docs.oasis-open.org/odata/ns/edmx"">
+  <edmx:DataServices>
+    <Schema Namespace=""NS"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
+      <EntityType Name=""Customer"">
+        <Key>
+          <PropertyRef Name=""ID"" />
+        </Key>
+        <Property Name=""ID"" Type=""Edm.Int32"" Nullable=""false"" />
+        {1}
+      </EntityType>
+      <ComplexType Name=""Address"">
+        <Property Name=""Street"" Type=""Edm.String"" />
+        {1}
+      </ComplexType>
+      {0}
+      <EntityContainer Name =""Default"">
+         <EntitySet Name=""Customers"" EntityType=""NS.Customer"" />
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>";
+            string modelText = string.Format(template, types, properties);
+
+            IEdmModel model;
+            IEnumerable<EdmError> errors;
+
+            bool result = CsdlReader.TryParse(XElement.Parse(modelText).CreateReader(), out model, out errors);
+            Assert.True(result);
+            return model;
+        }
+
+        private string GetStringAnnotation(IEdmModel model, IEdmVocabularyAnnotatable target, IEdmTerm term, EdmVocabularyAnnotationSerializationLocation location, bool inlineAnnotation=true)
+        {
+            IEdmVocabularyAnnotation annotation = model.FindVocabularyAnnotations<IEdmVocabularyAnnotation>(target, term).FirstOrDefault();
+            if (annotation != null)
+            {
+                // We only create an instance of EdmAnnotationsTarget for OutOfLine annotations. Inline annotations don't have the Target attribute.
+                if (inlineAnnotation)
+                {
+                    Assert.False(annotation.Target.GetType().IsAssignableFrom(typeof(IEdmAnnotationsTarget)));
+                }
+                else
+                {
+                    Assert.True(typeof(IEdmAnnotationsTarget).IsAssignableFrom(annotation.Target.GetType()));
+                }
+
+                Assert.True(annotation.GetSerializationLocation(model) == location);
+
+                IEdmStringConstantExpression stringConstant = annotation.Value as IEdmStringConstantExpression;
+                if (stringConstant != null)
+                {
+                    return stringConstant.Value;
+                }
+            }
+
+            return null;
         }
     }
 }

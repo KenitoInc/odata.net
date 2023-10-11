@@ -382,7 +382,8 @@ namespace Microsoft.OData.Edm.Csdl.CsdlSemantics
                             {
                                 if (String.Equals(member.Name, targetSegments[1], StringComparison.OrdinalIgnoreCase))
                                 {
-                                    return member;
+                                    //return member;
+                                    return new EdmAnnotationsTarget(target, member);
                                 }
                             }
 
