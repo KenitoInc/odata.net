@@ -1367,7 +1367,7 @@ namespace Microsoft.OData.Edm
         }
 
         /// <summary>
-        /// Resolves the target path and returns the path segments as vocabulary annotatable elements.
+        /// Resolves the annotations target and returns the target segments as Edm elements.
         /// </summary>
         /// <param name="model">The EdmModel.</param>
         /// <param name="target">The annotations target.</param>

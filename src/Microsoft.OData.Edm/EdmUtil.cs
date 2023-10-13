@@ -421,13 +421,14 @@ namespace Microsoft.OData.Edm
 
         internal static string FullyQualifiedName(IEdmVocabularyAnnotatable element)
         {
-            IEdmSchemaElement schemaElement = element as IEdmSchemaElement;
             IEdmAnnotationsTarget annotationsTarget = element as IEdmAnnotationsTarget;
 
             if (annotationsTarget != null)
             {
-                return annotationsTarget.Target;
+                return FullyQualifiedName(annotationsTarget);
             }
+
+            IEdmSchemaElement schemaElement = element as IEdmSchemaElement;
 
             if (schemaElement != null)
             {
@@ -497,6 +498,66 @@ namespace Microsoft.OData.Edm
             }
 
             return null;
+        }
+
+        private static string FullyQualifiedName(IEdmAnnotationsTarget annotationsTarget)
+        {
+            string qualifiedName = string.Empty;
+            List<IEdmElement> segments = annotationsTarget.TargetSegments.ToList();
+            IEdmEntityContainer container = segments[0] as IEdmEntityContainer;
+            IEdmEntityContainerElement containerElement = segments[1] as IEdmEntityContainerElement;
+
+            if (container == null || containerElement == null)
+            {
+                return null;
+            }
+
+            qualifiedName = container.FullName() + "/" + containerElement.Name;
+
+            if (segments.Count == 3)
+            {
+                // The only supported targets
+                // MySchema.MyEntityContainer/MyEntitySet/MyProperty
+                // MySchema.MyEntityContainer/MyEntitySet/MyNavigationProperty
+
+                IEdmProperty property = segments[2] as IEdmProperty;
+
+                qualifiedName = qualifiedName + "/" + property.Name;
+            }
+            else if (segments.Count == 4)
+            {
+                // The only supported targets
+                // MySchema.MyEntityContainer/MyEntitySet/MySchema.MyEntityType/MyProperty
+                // MySchema.MyEntityContainer/MyEntitySet/MySchema.MyEntityType/MyNavProperty
+                // MySchema.MyEntityContainer/MyEntitySet/MyComplexProperty/MyProperty
+                // MySchema.MyEntityContainer/MyEntitySet/MyComplexProperty/MyNavigationProperty
+                // MySchema.MyEntityContainer/MySingleton/MyComplexProperty/MyNavigationProperty
+
+                IEdmSchemaType schemaType = segments[3] as IEdmSchemaType;
+                string schemaTypeName;
+
+                if (schemaType != null)
+                {
+                    schemaTypeName = FullyQualifiedName(schemaType);
+
+                    IEdmProperty property = segments[4] as IEdmProperty;
+
+                    if (property != null)
+                    {
+                        qualifiedName = qualifiedName + "/" + schemaTypeName + "/" + property.Name;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return qualifiedName;
         }
 
         [DebuggerStepThrough]

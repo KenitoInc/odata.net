@@ -15,16 +15,6 @@ namespace Microsoft.OData.Edm
     public interface IEdmAnnotationsTarget : IEdmVocabularyAnnotatable
     {
         /// <summary>
-        /// Gets the target string, like "A.B/C/D.E".
-        /// </summary>
-        string Target { get; }
-
-        /// <summary>
-        /// Gets the target element".
-        /// </summary>
-        IEdmVocabularyAnnotatable TargetElement { get; }
-
-        /// <summary>
         /// Gets the annotation target segments as Edm elements.
         /// </summary>
         IEnumerable<IEdmElement> TargetSegments { get; }

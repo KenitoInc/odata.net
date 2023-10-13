@@ -40,7 +40,8 @@ namespace Microsoft.OData.Edm.Tests.Csdl
             function.AddParameter(optionalParamWithDefault);
             model.AddElement(function);
 
-            EdmAnnotationsTarget annotationsTarget = new EdmAnnotationsTarget("NS.TestFunction(Edm.String)/optionalParamWithDefault", optionalParamWithDefault);
+            //EdmAnnotationsTarget annotationsTarget = new EdmAnnotationsTarget("NS.TestFunction(Edm.String)/optionalParamWithDefault", optionalParamWithDefault);
+            EdmAnnotationsTarget annotationsTarget = new EdmAnnotationsTarget(function, optionalParamWithDefault);
 
             // parameter with default value
             IEdmComplexType optionalParameterType = CoreVocabularyModel.Instance.FindDeclaredType("Org.OData.Core.V1.OptionalParameterType") as IEdmComplexType;
@@ -117,7 +118,11 @@ namespace Microsoft.OData.Edm.Tests.Csdl
             var washer = new EdmEnumMember(appliance, "Washer", new EdmEnumMemberValue(2));
             appliance.AddMember(washer);
 
-            EdmAnnotationsTarget target = new EdmAnnotationsTarget("NS.Appliance/Stove", stove);
+            //EdmAnnotationsTarget target = new EdmAnnotationsTarget("NS.Appliance/Stove", stove);
+            EdmAnnotationsTarget target = new EdmAnnotationsTarget(appliance,stove);
+
+            // Create this extension method
+            // IEdmAnnotationsTarget annotsTarget = model.BuildAnnotationsTarget("Ns.Appliance/Stove");
 
             EdmVocabularyAnnotation annotation = new EdmVocabularyAnnotation(target, CoreVocabularyModel.LongDescriptionTerm, new EdmStringConstant("Stove Inline LongDescription"));
             annotation.SetSerializationLocation(model, EdmVocabularyAnnotationSerializationLocation.Inline);

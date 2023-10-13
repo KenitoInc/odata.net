@@ -17,20 +17,19 @@ namespace Microsoft.OData.Edm
     public class EdmAnnotationsTarget : IEdmAnnotationsTarget
     {
         private IEnumerable<IEdmElement> targetSegments;
-        private string target;
-        private IEdmVocabularyAnnotatable targetElement;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmAnnotationsTarget"/> class.
         /// </summary>
         /// <param name="target">Target string containing segments separated by '/'. For example: "A.B/C/D.E/Func1(NS.T,NS.T2)/P1".</param>
-        /// <param name="targetElement">Target element.</param>
-        public EdmAnnotationsTarget(string target, IEdmVocabularyAnnotatable targetElement)
+        /// <param name="targetSegments">Target segments.</param>
+        public EdmAnnotationsTarget(IEnumerable<IEdmElement> targetSegments)
         {
-            EdmUtil.CheckArgumentNull(target, nameof(target));
-            EdmUtil.CheckArgumentNull(targetElement, nameof(targetElement));
-            this.target = target;
-            this.targetElement = targetElement;
+            EdmUtil.CheckArgumentNull(targetSegments, nameof(targetSegments));
+
+            // TODO: Validate that the first element is Container.
+
+            this.targetSegments = targetSegments;
         }
 
         /// <summary>
@@ -38,12 +37,10 @@ namespace Microsoft.OData.Edm
         /// </summary>
         /// <param name="target">Target string containing segments separated by '/'. For example: "A.B/C/D.E/Func1(NS.T,NS.T2)/P1".</param>
         /// <param name="targetSegments">Target segments.</param>
-        public EdmAnnotationsTarget(string target, IEnumerable<IEdmElement> targetSegments)
+
+        public EdmAnnotationsTarget(params IEdmElement[] targetSegments)
+            :this((IEnumerable<IEdmElement>)targetSegments)
         {
-            EdmUtil.CheckArgumentNull(target, nameof(target));
-            EdmUtil.CheckArgumentNull(targetSegments, nameof(targetSegments));
-            this.target = target;
-            this.targetSegments = targetSegments;
         }
 
         /// <summary>
@@ -52,22 +49,6 @@ namespace Microsoft.OData.Edm
         public IEnumerable<IEdmElement> TargetSegments
         {
             get { return this.targetSegments; }
-        }
-
-        /// <summary>
-        /// Gets the target string, like "A.B/C/D.E".
-        /// </summary>
-        public string Target
-        {
-            get { return this.target; }
-        }
-        
-        /// <summary>
-        /// Gets the target element.
-        /// </summary>
-        public IEdmVocabularyAnnotatable TargetElement
-        {
-            get { return this.targetElement; }
         }
     }
 }

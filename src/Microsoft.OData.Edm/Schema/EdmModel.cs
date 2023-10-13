@@ -157,7 +157,7 @@ namespace Microsoft.OData.Edm
             {
                 if (kvp.Key is IEdmAnnotationsTarget annotationsTarget)
                 {
-                    if (annotationsTarget.TargetElement == element)
+                    if (annotationsTarget.TargetSegments.Last() == element)
                     {
                         elementAnnotations.AddRange(kvp.Value);
                         elementAnnotations = elementAnnotations.Distinct().ToList();

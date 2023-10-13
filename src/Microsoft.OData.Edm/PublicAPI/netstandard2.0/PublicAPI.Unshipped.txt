@@ -1,11 +1,7 @@
 ﻿Microsoft.OData.Edm.EdmAnnotationsTarget
-Microsoft.OData.Edm.EdmAnnotationsTarget.EdmAnnotationsTarget(string target, Microsoft.OData.Edm.Vocabularies.IEdmVocabularyAnnotatable targetElement) -> void
-Microsoft.OData.Edm.EdmAnnotationsTarget.EdmAnnotationsTarget(string target, System.Collections.Generic.IEnumerable<Microsoft.OData.Edm.IEdmElement> targetSegments) -> void
-Microsoft.OData.Edm.EdmAnnotationsTarget.Target.get -> string
-Microsoft.OData.Edm.EdmAnnotationsTarget.TargetElement.get -> Microsoft.OData.Edm.Vocabularies.IEdmVocabularyAnnotatable
+Microsoft.OData.Edm.EdmAnnotationsTarget.EdmAnnotationsTarget(params Microsoft.OData.Edm.IEdmElement[] targetSegments) -> void
+Microsoft.OData.Edm.EdmAnnotationsTarget.EdmAnnotationsTarget(System.Collections.Generic.IEnumerable<Microsoft.OData.Edm.IEdmElement> targetSegments) -> void
 Microsoft.OData.Edm.EdmAnnotationsTarget.TargetSegments.get -> System.Collections.Generic.IEnumerable<Microsoft.OData.Edm.IEdmElement>
 Microsoft.OData.Edm.IEdmAnnotationsTarget
-Microsoft.OData.Edm.IEdmAnnotationsTarget.Target.get -> string
-Microsoft.OData.Edm.IEdmAnnotationsTarget.TargetElement.get -> Microsoft.OData.Edm.Vocabularies.IEdmVocabularyAnnotatable
 Microsoft.OData.Edm.IEdmAnnotationsTarget.TargetSegments.get -> System.Collections.Generic.IEnumerable<Microsoft.OData.Edm.IEdmElement>
 static Microsoft.OData.Edm.ExtensionMethods.ResolveAnnotationsTarget(this Microsoft.OData.Edm.EdmModel model, string target) -> System.Collections.Generic.IEnumerable<Microsoft.OData.Edm.IEdmElement>
