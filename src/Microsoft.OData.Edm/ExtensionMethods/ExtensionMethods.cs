@@ -1371,9 +1371,11 @@ namespace Microsoft.OData.Edm
         /// </summary>
         /// <param name="model">The EdmModel.</param>
         /// <param name="target">Target string containing segments separated by '/'. For example: "A.B/C/D.E/Func1(NS.T,NS.T2)/P1".</param>
-        /// <returns>The created term.</returns>
+        /// <returns>The created enumeration of <see cref="IEdmElement"/>.</returns>
         public static IEnumerable<IEdmElement> ResolveAnnotationsTarget(this IEdmModel model, string target)
         {
+            EdmUtil.CheckArgumentNull(target, nameof(target));
+
             string[] targetSegments = target.Split('/');
             int targetSegmentsCount = targetSegments.Length;
             IEdmEntityContainer container;
@@ -1409,6 +1411,47 @@ namespace Microsoft.OData.Edm
             }
 
             return Enumerable.Empty<IEdmElement>();
+        }
+
+        /// <summary>
+        /// Returns an <see cref="IEdmAnnotationsTarget"/> from a target string.
+        /// </summary>
+        /// <param name="model">The EdmModel.</param>
+        /// <param name="target">Target string containing segments separated by '/'. For example: "A.B/C/D.E/Func1(NS.T,NS.T2)/P1".</param>
+        /// <returns>The created annotations target.</returns>
+        public static IEdmAnnotationsTarget GetAnnotationsTarget(this IEdmModel model, string target)
+        {
+            EdmUtil.CheckArgumentNull(target, nameof(target));
+
+            IEnumerable<IEdmElement> edmElements = model.ResolveAnnotationsTarget(target);
+
+            return new EdmAnnotationsTarget(edmElements);
+        }
+
+        /// <summary>
+        /// Returns an <see cref="IEdmAnnotationsTarget"/> from an array of <see cref="IEdmElement"/>.
+        /// </summary>
+        /// <param name="model">The EdmModel.</param>
+        /// <param name="segments">An array of <see cref="IEdmElement"/>.</param>
+        /// <returns>The created annotations target.</returns>
+        public static IEdmAnnotationsTarget GetAnnotationsTarget(this IEdmModel model, params IEdmElement[] segments)
+        {
+            EdmUtil.CheckArgumentNull(segments, nameof(segments));
+
+            return new EdmAnnotationsTarget(segments);
+        }
+
+        /// <summary>
+        /// Returns an <see cref="IEdmAnnotationsTarget"/> from an array of <see cref="IEdmElement"/>.
+        /// </summary>
+        /// <param name="model">The EdmModel.</param>
+        /// <param name="segments">An enumeration of <see cref="IEdmElement"/>.</param>
+        /// <returns>The created annotations target.</returns>
+        public static IEdmAnnotationsTarget GetAnnotationsTarget(this IEdmModel model, IEnumerable<IEdmElement> segments)
+        {
+            EdmUtil.CheckArgumentNull(segments, nameof(segments));
+
+            return new EdmAnnotationsTarget(segments);
         }
 
         /// <summary>
