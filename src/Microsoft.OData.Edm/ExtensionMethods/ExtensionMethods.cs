@@ -1370,12 +1370,45 @@ namespace Microsoft.OData.Edm
         /// Resolves the annotations target and returns the target segments as Edm elements.
         /// </summary>
         /// <param name="model">The EdmModel.</param>
-        /// <param name="target">The annotations target.</param>
+        /// <param name="target">Target string containing segments separated by '/'. For example: "A.B/C/D.E/Func1(NS.T,NS.T2)/P1".</param>
         /// <returns>The created term.</returns>
-        public static IEnumerable<IEdmElement> ResolveAnnotationsTarget(this EdmModel model, string target)
+        public static IEnumerable<IEdmElement> ResolveAnnotationsTarget(this IEdmModel model, string target)
         {
-            // Implementation code
-            return null;
+            string[] targetSegments = target.Split('/');
+            int targetSegmentsCount = targetSegments.Length;
+            IEdmEntityContainer container;
+
+            if (targetSegmentsCount == 3)
+            {
+                container = model.FindEntityContainer(targetSegments[0]);
+
+                if (container != null)
+                {
+                    IEdmEntityContainerElement containerElement = container.FindEntitySetExtended(targetSegments[1])
+                                                                  ?? container.FindSingletonExtended(targetSegments[1]) as IEdmEntityContainerElement;
+
+                    IEdmEntitySet entitySet = container.FindEntitySetExtended(targetSegments[1]);
+                    IEdmSingleton singleton = container.FindSingletonExtended(targetSegments[1]);
+
+                    if (entitySet != null)
+                    {
+                        IEdmEntityType entityType = entitySet.EntityType();
+                        IEdmProperty edmProperty = entityType.FindProperty(targetSegments[2]);
+
+                        // Are annotation target case-insensitive?
+                        //IEdmProperty edmProperty2 = entityType.FindProperty(targetSegments[2],true);
+
+                        if (edmProperty != null)
+                        {
+                            return new List<IEdmElement> { container, entitySet, edmProperty };
+                        }
+                    }
+                }
+
+                return Enumerable.Empty<IEdmElement>();
+            }
+
+            return Enumerable.Empty<IEdmElement>();
         }
 
         /// <summary>

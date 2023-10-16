@@ -449,6 +449,23 @@ namespace Microsoft.OData.Edm.Csdl.CsdlSemantics
 
                             return new UnresolvedParameter(operationImport.Operation, parameterName, this.Location);
                         }
+
+                        IEdmEntityContainerElement containerElement = container.FindEntitySetExtended(targetSegments[1])
+                                                                      ?? container.FindSingletonExtended(targetSegments[1]) as IEdmEntityContainerElement;
+
+                        IEdmEntitySet entitySet = container.FindEntitySetExtended(targetSegments[1]);
+                        IEdmSingleton singleton = container.FindSingletonExtended(targetSegments[1]);
+
+                        if (entitySet != null)
+                        {
+                            IEdmEntityType entityType = entitySet.EntityType();
+                            IEdmProperty edmProperty = entityType.DeclaredProperties.Where(p => p.Name == targetSegments[2]).FirstOrDefault();
+
+                            if (edmProperty != null)
+                            {
+                                return new EdmAnnotationsTarget(container, entitySet, edmProperty);
+                            }
+                        }
                     }
 
                     string qualifiedOperationName = containerName + "/" + operationName;
