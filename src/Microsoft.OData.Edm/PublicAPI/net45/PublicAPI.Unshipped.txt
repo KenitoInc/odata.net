@@ -4,5 +4,7 @@ Microsoft.OData.Edm.EdmAnnotationsTarget.EdmAnnotationsTarget(System.Collections
 Microsoft.OData.Edm.EdmAnnotationsTarget.TargetSegments.get -> System.Collections.Generic.IEnumerable<Microsoft.OData.Edm.IEdmElement>
 Microsoft.OData.Edm.IEdmAnnotationsTarget
 Microsoft.OData.Edm.IEdmAnnotationsTarget.TargetSegments.get -> System.Collections.Generic.IEnumerable<Microsoft.OData.Edm.IEdmElement>
+static Microsoft.OData.Edm.ExtensionMethods.GetAnnotationsTarget(this Microsoft.OData.Edm.IEdmModel model, params Microsoft.OData.Edm.IEdmElement[] segments) -> Microsoft.OData.Edm.IEdmAnnotationsTarget
 static Microsoft.OData.Edm.ExtensionMethods.GetAnnotationsTarget(this Microsoft.OData.Edm.IEdmModel model, string target) -> Microsoft.OData.Edm.IEdmAnnotationsTarget
+static Microsoft.OData.Edm.ExtensionMethods.GetAnnotationsTarget(this Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IEnumerable<Microsoft.OData.Edm.IEdmElement> segments) -> Microsoft.OData.Edm.IEdmAnnotationsTarget
 static Microsoft.OData.Edm.ExtensionMethods.ResolveAnnotationsTarget(this Microsoft.OData.Edm.IEdmModel model, string target) -> System.Collections.Generic.IEnumerable<Microsoft.OData.Edm.IEdmElement>
