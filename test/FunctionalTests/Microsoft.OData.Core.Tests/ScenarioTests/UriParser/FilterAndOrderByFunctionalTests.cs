@@ -2926,6 +2926,25 @@ namespace Microsoft.OData.Tests.ScenarioTests.UriParser
             Assert.Equal(expectedSecondLiteral, constantNode2.LiteralText);
         }
 
+        [Theory]
+        [InlineData("MyOpenAddress/OpenProp in ('', \"  \")", "\"\"", "  ")]
+        [InlineData("MyOpenAddress/OpenProp in ('123','456')", "123", "456")]
+        public void FilterOpenComplexTypePropertyWithInOperation(string filterQueryString, string expectedFirstLiteral, string expectedSecondLiteral)
+        {
+            FilterClause filter = ParseFilter(filterQueryString,
+                HardCodedTestModel.TestModel, HardCodedTestModel.GetPersonType());
+
+            var inNode = Assert.IsType<InNode>(filter.Expression);
+            CollectionConstantNode collectionNode = Assert.IsType<CollectionConstantNode>(inNode.Right);
+            Assert.Equal(2, collectionNode.Collection.Count);
+
+            ConstantNode constantNode1 = collectionNode.Collection.First();
+            Assert.Equal(expectedFirstLiteral, constantNode1.LiteralText);
+
+            ConstantNode constantNode2 = collectionNode.Collection.Last();
+            Assert.Equal(expectedSecondLiteral, constantNode2.LiteralText);
+        }
+
         #endregion
 
         private static FilterClause ParseFilter(string text, IEdmModel edmModel, IEdmType edmType, IEdmNavigationSource edmEntitySet = null)
